@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from 'react';
+import { Chart } from './components/Chart';
 
 const socket = new WebSocket('ws://localhost:4567/ws');
 
 const App = () => {
-  const [messages, setMessages] = useState<string[]>([]);
-  const [voltages, setVoltages] = useState<number[]>([]);
-  const [inputText, setInputText] = useState('');
+  const [voltages, setVoltages] = useState<[number, number][]>([]);
   const [isCounting, setIsCounting] = useState(false);
 
+  // ラズパイの代わり
   useEffect(() => {
     if (!isCounting) return;
     const id = setInterval(() => {
-      const num = Math.random();
+      const num = Math.floor(Math.random() * 100);
       socket.send(JSON.stringify({ type: 'voltageData', data: num }));
     }, 1000);
 
@@ -30,30 +30,15 @@ const App = () => {
       return;
     }
     const message = JSON.parse(event.data);
+    console.log(message);
     if (message.type === 'voltageData') {
-      setVoltages([...voltages, message.data]);
+      setVoltages([...voltages, [Date.now(), message.data]]);
       return;
     }
-    if (message.type === 'message') {
-      setMessages([...messages, message.data]);
-    }
-  };
-
-  const sendMessage = () => {
-    if (!socket) return;
-    socket.send(JSON.stringify({ type: 'message', data: inputText }));
-    setInputText('');
   };
 
   return (
     <div className="App">
-      <div>
-        <input
-          value={inputText}
-          onChange={(event) => setInputText(event.target.value)}
-        />
-        <button onClick={sendMessage}>send</button>
-      </div>
       <div>
         <button
           onClick={() => {
@@ -64,15 +49,13 @@ const App = () => {
         </button>
         <button
           onClick={() => {
-            setMessages([]);
+            setVoltages([]);
           }}
         >
           clear
         </button>
       </div>
-      {messages.map((message, i) => (
-        <div key={i}>{message}</div>
-      ))}
+      <Chart data={voltages} />
     </div>
   );
 };
