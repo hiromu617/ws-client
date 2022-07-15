@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Chart } from './components/Chart';
+import { Button, Flex, Grid, GridItem } from '@chakra-ui/react';
 
 const socket = new WebSocket('ws://localhost:4567/ws');
 
@@ -39,23 +40,35 @@ const App = () => {
 
   return (
     <div className="App">
-      <div>
-        <button
+      <Flex gap={4} p={4}>
+        <Button
           onClick={() => {
             setIsCounting(!isCounting);
           }}
         >
           {!isCounting ? 'start' : 'stop'}
-        </button>
-        <button
+        </Button>
+        <Button
           onClick={() => {
             setVoltages([]);
           }}
         >
           clear
-        </button>
-      </div>
-      <Chart data={voltages} />
+        </Button>
+      </Flex>
+      <Grid
+        templateColumns="repeat(3, 1fr)"
+        templateRows="repeat(3, 1fr)"
+        gap={2}
+      >
+        {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
+          return (
+            <GridItem w="100%" h="300" bg="blue.50" key={i}>
+              <Chart data={voltages} />
+            </GridItem>
+          );
+        })}
+      </Grid>
     </div>
   );
 };

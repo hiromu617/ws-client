@@ -9,6 +9,9 @@ type Props = {
 export const Chart: VFC<Props> = ({ data }) => {
   return (
     <ApexChart
+      title={{
+        text: 'voltage1',
+      }}
       series={[
         {
           name: 'Series 1',
@@ -17,7 +20,7 @@ export const Chart: VFC<Props> = ({ data }) => {
       ]}
       options={{
         chart: {
-          height: 350,
+          height: 300,
           type: 'line',
           zoom: {
             enabled: false,
@@ -30,7 +33,7 @@ export const Chart: VFC<Props> = ({ data }) => {
             },
           },
           toolbar: {
-            show: false
+            show: false,
           },
         },
         xaxis: {
@@ -38,10 +41,10 @@ export const Chart: VFC<Props> = ({ data }) => {
           labels: {
             datetimeUTC: false, //表示をJSTにする
           },
-          range: 10000
+          range: 10000,
         },
       }}
-      height={350}
+      height={300}
       type="line"
     />
   );
