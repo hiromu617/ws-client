@@ -4,16 +4,59 @@ import { Button, Flex, Grid, GridItem } from '@chakra-ui/react';
 
 const socket = new WebSocket('ws://localhost:4567/ws');
 
+//  data format
+// [
+//   [
+//     [100000, 100],
+//     [100000, 100],
+//     [100000, 100],
+//   ],
+//   [
+//     [100000, 100],
+//     [100000, 100],
+//     [100000, 100],
+//   ],
+//   [
+//     [100000, 100],
+//     [100000, 100],
+//     [100000, 100],
+//   ],
+// ]
+
 const App = () => {
-  const [voltages, setVoltages] = useState<[number, number][]>([]);
+  const [voltages, setVoltages] = useState<[number, number][][]>([
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+    [],
+  ]);
   const [isCounting, setIsCounting] = useState(false);
 
   // ラズパイの代わり
   useEffect(() => {
     if (!isCounting) return;
     const id = setInterval(() => {
-      const num = Math.floor(Math.random() * 100);
-      socket.send(JSON.stringify({ type: 'voltageData', data: num }));
+      socket.send(
+        JSON.stringify({
+          type: 'voltageData',
+          data: [
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+          ],
+        }),
+      );
     }, 1000);
 
     return () => {
@@ -30,10 +73,14 @@ const App = () => {
     if (!event.data) {
       return;
     }
-    const message = JSON.parse(event.data);
-    console.log(message);
+    const message: { type: string; data: number[] } = JSON.parse(event.data);
     if (message.type === 'voltageData') {
-      setVoltages([...voltages, [Date.now(), message.data]]);
+      const now = Date.now();
+      const newArray = voltages.map((voltage, i) => [
+        ...voltage,
+        [now, message.data[i]],
+      ]);
+      setVoltages(newArray as [number, number][][]);
       return;
     }
   };
@@ -50,7 +97,7 @@ const App = () => {
         </Button>
         <Button
           onClick={() => {
-            setVoltages([]);
+            setVoltages([[],[],[],[],[],[],[],[],[]]);
           }}
         >
           clear
@@ -64,7 +111,7 @@ const App = () => {
         {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
           return (
             <GridItem w="100%" h="300" bg="blue.50" key={i}>
-              <Chart data={voltages} />
+              <Chart data={voltages[i]} />
             </GridItem>
           );
         })}
