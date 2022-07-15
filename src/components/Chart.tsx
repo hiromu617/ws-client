@@ -30,7 +30,7 @@ export const Chart: VFC<Props> = ({ index }) => {
             enabled: false,
           },
           animations: {
-            enabled: true,
+            enabled: false,
             easing: 'linear',
             // dynamicAnimation: {
             //   speed: 1000,

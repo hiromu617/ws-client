@@ -4,7 +4,7 @@ import { Button, Flex, Grid, GridItem } from '@chakra-ui/react';
 import { useSetRecoilState } from 'recoil';
 import { voltageState } from './recoil/atoms';
 
-const socket = new WebSocket('ws://localhost:4567/ws');
+const socket = new WebSocket(`ws://${process.env.REACT_APP_BASE_URL}/ws`);
 
 //  data format
 // [
@@ -26,17 +26,6 @@ const socket = new WebSocket('ws://localhost:4567/ws');
 // ]
 
 const App = () => {
-  const [voltages, setVoltages] = useState<[number, number][][]>([
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-    [],
-  ]);
   const setVoltageState = useSetRecoilState(voltageState);
   const [isCounting, setIsCounting] = useState(false);
 
