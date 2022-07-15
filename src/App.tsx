@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Chart } from './components/Chart';
 import { Button, Flex, Grid, GridItem } from '@chakra-ui/react';
+import { useSetRecoilState } from 'recoil';
+import { voltageState } from './recoil/atoms';
 
 const socket = new WebSocket('ws://localhost:4567/ws');
 
@@ -35,6 +37,7 @@ const App = () => {
     [],
     [],
   ]);
+  const setVoltageState = useSetRecoilState(voltageState);
   const [isCounting, setIsCounting] = useState(false);
 
   // ラズパイの代わり
@@ -57,7 +60,7 @@ const App = () => {
           ],
         }),
       );
-    }, 1000);
+    }, 500);
 
     return () => {
       console.log('clear');
@@ -76,28 +79,27 @@ const App = () => {
     const message: { type: string; data: number[] } = JSON.parse(event.data);
     if (message.type === 'voltageData') {
       const now = Date.now();
-      const newArray = voltages.map((voltage, i) => [
-        ...voltage,
-        [now, message.data[i]],
-      ]);
-      setVoltages(newArray as [number, number][][]);
+      setVoltageState((old) =>
+        old.map((voltage, i) => [...voltage, [now, message.data[i]]]),
+      );
       return;
     }
   };
 
   return (
-    <div className="App">
+    <div>
       <Flex gap={4} p={4}>
         <Button
           onClick={() => {
             setIsCounting(!isCounting);
           }}
+          colorScheme={!isCounting ? 'blue' : 'red'}
         >
           {!isCounting ? 'start' : 'stop'}
         </Button>
         <Button
           onClick={() => {
-            setVoltages([[],[],[],[],[],[],[],[],[]]);
+            setVoltageState([[], [], [], [], [], [], [], [], []]);
           }}
         >
           clear
@@ -111,7 +113,7 @@ const App = () => {
         {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
           return (
             <GridItem w="100%" h="300" bg="blue.50" key={i}>
-              <Chart data={voltages[i]} />
+              <Chart index={i} />
             </GridItem>
           );
         })}

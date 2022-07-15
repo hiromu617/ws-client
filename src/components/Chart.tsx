@@ -1,12 +1,16 @@
 import React, { VFC } from 'react';
 import ApexChart from 'react-apexcharts';
-import { ApexOptions } from 'apexcharts';
+import { voltageState } from '../recoil/atoms';
+import { useRecoilValue } from 'recoil';
 
 type Props = {
-  data: [number, number][];
+  index: number;
 };
 
-export const Chart: VFC<Props> = ({ data }) => {
+export const Chart: VFC<Props> = ({ index }) => {
+  const voltages = useRecoilValue(voltageState);
+  const data = voltages[index];
+
   return (
     <ApexChart
       title={{
@@ -28,9 +32,13 @@ export const Chart: VFC<Props> = ({ data }) => {
           animations: {
             enabled: true,
             easing: 'linear',
-            dynamicAnimation: {
-              speed: 1000,
-            },
+            // dynamicAnimation: {
+            //   speed: 1000,
+            // },
+            animateGradually: {
+              enabled: true,
+              delay: 150
+          },
           },
           toolbar: {
             show: false,
