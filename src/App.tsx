@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Chart } from './components/Chart';
 import { Button, Flex, Grid, GridItem } from '@chakra-ui/react';
 import { useSetRecoilState } from 'recoil';
@@ -29,34 +29,7 @@ const App = () => {
   const setVoltageState = useSetRecoilState(voltageState);
   const [isCounting, setIsCounting] = useState(false);
   const [isReceived, setIsReceived] = useState(false);
-
-  // ラズパイの代わり
-  useEffect(() => {
-    if (!isCounting) return;
-    const id = setInterval(() => {
-      socket.send(
-        JSON.stringify({
-          type: 'voltageData',
-          data: [
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-          ],
-        }),
-      );
-    }, 500);
-
-    return () => {
-      console.log('clear');
-      clearInterval(id);
-    };
-  }, [isCounting]);
+  let intervalId = useRef<NodeJS.Timer | null>(null);
 
   socket.onopen = () => {
     console.log('socket connected');
@@ -77,12 +50,42 @@ const App = () => {
     }
   };
 
+  const start = () => {
+    setIsCounting(true);
+    const id = setInterval(() => {
+      socket.send(
+        JSON.stringify({
+          type: 'voltageData',
+          data: [
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 100),
+          ],
+        }),
+      );
+      intervalId.current = id;
+    }, 300);
+  };
+
+  const stop = () => {
+    if (!intervalId.current) return;
+    setIsCounting(false);
+    clearInterval(intervalId.current);
+  };
+
   return (
     <div>
       <Flex gap={4} p={4}>
         <Button
           onClick={() => {
-            setIsCounting(!isCounting);
+            if (!isCounting) start();
+            else stop();
           }}
           colorScheme={!isCounting ? 'blue' : 'red'}
         >
