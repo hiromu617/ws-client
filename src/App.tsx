@@ -28,6 +28,7 @@ const socket = new WebSocket(`ws://${process.env.REACT_APP_BASE_URL}/ws`);
 const App = () => {
   const setVoltageState = useSetRecoilState(voltageState);
   const [isCounting, setIsCounting] = useState(false);
+  const [isReceived, setIsReceived] = useState(false);
 
   // ラズパイの代わり
   useEffect(() => {
@@ -62,6 +63,7 @@ const App = () => {
     console.log(socket);
   };
   socket.onmessage = (event) => {
+    if (!isReceived) setIsReceived(true);
     if (!event.data) {
       return;
     }
@@ -84,7 +86,7 @@ const App = () => {
           }}
           colorScheme={!isCounting ? 'blue' : 'red'}
         >
-          {!isCounting ? 'start' : 'stop'}
+          {!isCounting ? 'start(simulation)' : 'stop'}
         </Button>
         <Button
           onClick={() => {
@@ -92,6 +94,15 @@ const App = () => {
           }}
         >
           clear
+        </Button>
+        <Button
+          disabled={!isReceived}
+          onClick={() => {
+            socket.send('stop');
+            setIsReceived(false);
+          }}
+        >
+          Stop
         </Button>
       </Flex>
       <Grid
