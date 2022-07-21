@@ -24,7 +24,7 @@ export const Chart: VFC<Props> = ({ index }) => {
       ]}
       options={{
         chart: {
-          height: 300,
+          height: '100%',
           type: 'line',
           zoom: {
             enabled: false,
@@ -37,8 +37,8 @@ export const Chart: VFC<Props> = ({ index }) => {
             // },
             animateGradually: {
               enabled: true,
-              delay: 150
-          },
+              delay: 150,
+            },
           },
           toolbar: {
             show: false,
@@ -51,8 +51,12 @@ export const Chart: VFC<Props> = ({ index }) => {
           },
           range: 10000,
         },
+        yaxis: {
+          min: 0,
+          max: 3,
+        },
       }}
-      height={300}
+      height={'100%'}
       type="line"
     />
   );

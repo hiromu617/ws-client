@@ -3,8 +3,12 @@ import { Chart } from './components/Chart';
 import { Button, Flex, Grid, GridItem } from '@chakra-ui/react';
 import { useSetRecoilState } from 'recoil';
 import { voltageState } from './recoil/atoms';
+import { send } from 'process';
 
-const socket = new WebSocket(`ws://${process.env.REACT_APP_BASE_URL}/ws`);
+const socket = new WebSocket(
+  `ws://abracadabrant-chaise-74400.herokuapp.com/ws`,
+);
+// https://abracadabrant-chaise-74400.herokuapp.com/
 
 //  data format
 // [
@@ -29,6 +33,7 @@ const App = () => {
   const setVoltageState = useSetRecoilState(voltageState);
   const [isCounting, setIsCounting] = useState(false);
   const [isReceived, setIsReceived] = useState(false);
+  const [startTime, setStartTime] = useState(0);
   let intervalId = useRef<NodeJS.Timer | null>(null);
 
   socket.onopen = () => {
@@ -38,6 +43,11 @@ const App = () => {
   socket.onmessage = (event) => {
     if (!isReceived) setIsReceived(true);
     if (!event.data) {
+      return;
+    }
+    if (event.data === 'measureTime') {
+      const endTime = Date.now();
+      alert(`${endTime - startTime}ms`);
       return;
     }
     const message: { type: string; data: number[] } = JSON.parse(event.data);
@@ -57,15 +67,15 @@ const App = () => {
         JSON.stringify({
           type: 'voltageData',
           data: [
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
-            Math.floor(Math.random() * 100),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
+            Math.floor(Math.random() * 3),
           ],
         }),
       );
@@ -77,6 +87,11 @@ const App = () => {
     if (!intervalId.current) return;
     setIsCounting(false);
     clearInterval(intervalId.current);
+  };
+
+  const measureTime = () => {
+    setStartTime(Date.now());
+    socket.send('measureTime');
   };
 
   return (
@@ -107,15 +122,17 @@ const App = () => {
         >
           Stop
         </Button>
+        <Button onClick={measureTime}>measure time</Button>
       </Flex>
       <Grid
         templateColumns="repeat(3, 1fr)"
         templateRows="repeat(3, 1fr)"
         gap={2}
+        h="full"
       >
         {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((i) => {
           return (
-            <GridItem w="100%" h="300" bg="blue.50" key={i}>
+            <GridItem w="100%" h="30vh" bg="blue.50" key={i}>
               <Chart index={i} />
             </GridItem>
           );
